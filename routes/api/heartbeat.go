@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	conf "github.com/muety/wakapi/config"
@@ -49,6 +50,42 @@ func (h *HeartbeatApiHandler) RegisterRoutes(router *mux.Router) {
 	r.Path("/v1/users/{user}/heartbeats.bulk").Methods(http.MethodPost).HandlerFunc(h.Post)
 	r.Path("/compat/wakatime/v1/users/{user}/heartbeats").Methods(http.MethodPost).HandlerFunc(h.Post)
 	r.Path("/compat/wakatime/v1/users/{user}/heartbeats.bulk").Methods(http.MethodPost).HandlerFunc(h.Post)
+	r.Path("/compat/wakatime/v1/users/{user}/heartbeats").Methods(http.MethodGet).HandlerFunc(h.Get)
+}
+
+// @Summary Get heartbeats of user for specified date
+// @ID get-heartbeats
+// @Tags heartbeat
+// @Param date query string true "Date"
+// @Param user path string true "Username (or current)"
+// @Security ApiKeyAuth
+// @Success 200
+// @Router /compat/wakatime/v1/users/{user}/heartbeats [get]
+func (h *HeartbeatApiHandler) Get(w http.ResponseWriter, r *http.Request) {
+	user, err := routeutils.CheckEffectiveUser(w, r, h.userSrvc, "current")
+	if err != nil {
+		return // response was already sent by util function
+	}
+
+	params := r.URL.Query()
+	dateParam := params.Get("date")
+	date, err := time.Parse(conf.SimpleDateFormat, dateParam)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("bad date"))
+		return
+	}
+	timezone := user.TZ()
+	rangeFrom, rangeTo := utils.StartOfDay(date).In(timezone), utils.EndOfDay(date).In(timezone)
+
+	heartbeats, err := h.heartbeatSrvc.GetAllWithin(rangeFrom, rangeTo, user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(conf.ErrInternalServerError))
+		conf.Log().Request(r).Error("failed to retrieve heartbeats - %v", err)
+		return
+	}
+	utils.RespondJSON(w, r, http.StatusOK, heartbeats)
 }
 
 // @Summary Push a new heartbeat
@@ -145,6 +182,7 @@ func constructSuccessResponse(n int) *heartbeatResponseVm {
 // @Tags heartbeat
 // @Accept json
 // @Param heartbeat body models.Heartbeat true "A single heartbeat"
+// @Param user path string true "Username (or current)"
 // @Security ApiKeyAuth
 // @Success 201
 // @Router /v1/users/{user}/heartbeats [post]
@@ -155,6 +193,7 @@ func (h *HeartbeatApiHandler) postAlias1() {}
 // @Tags heartbeat
 // @Accept json
 // @Param heartbeat body models.Heartbeat true "A single heartbeat"
+// @Param user path string true "Username (or current)"
 // @Security ApiKeyAuth
 // @Success 201
 // @Router /compat/wakatime/v1/users/{user}/heartbeats [post]
@@ -165,6 +204,7 @@ func (h *HeartbeatApiHandler) postAlias2() {}
 // @Tags heartbeat
 // @Accept json
 // @Param heartbeat body models.Heartbeat true "A single heartbeat"
+// @Param user path string true "Username (or current)"
 // @Security ApiKeyAuth
 // @Success 201
 // @Router /users/{user}/heartbeats [post]
@@ -185,6 +225,7 @@ func (h *HeartbeatApiHandler) postAlias4() {}
 // @Tags heartbeat
 // @Accept json
 // @Param heartbeat body []models.Heartbeat true "Multiple heartbeats"
+// @Param user path string true "Username (or current)"
 // @Security ApiKeyAuth
 // @Success 201
 // @Router /v1/users/{user}/heartbeats.bulk [post]
@@ -195,6 +236,7 @@ func (h *HeartbeatApiHandler) postAlias5() {}
 // @Tags heartbeat
 // @Accept json
 // @Param heartbeat body []models.Heartbeat true "Multiple heartbeats"
+// @Param user path string true "Username (or current)"
 // @Security ApiKeyAuth
 // @Success 201
 // @Router /compat/wakatime/v1/users/{user}/heartbeats.bulk [post]
@@ -205,6 +247,7 @@ func (h *HeartbeatApiHandler) postAlias6() {}
 // @Tags heartbeat
 // @Accept json
 // @Param heartbeat body []models.Heartbeat true "Multiple heartbeats"
+// @Param user path string true "Username (or current)"
 // @Security ApiKeyAuth
 // @Success 201
 // @Router /users/{user}/heartbeats.bulk [post]
