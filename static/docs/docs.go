@@ -189,7 +189,16 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.HeartbeatsResult"
+                        }
+                    },
+                    "400": {
+                        "description": "bad date",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             },
@@ -1301,6 +1310,26 @@ var doc = `{
                 },
                 "schemaVersion": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.HeartbeatsResult": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Heartbeat"
+                    }
+                },
+                "end": {
+                    "type": "string"
+                },
+                "start": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
                 }
             }
         },

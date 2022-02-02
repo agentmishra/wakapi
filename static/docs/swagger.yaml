@@ -148,6 +148,19 @@ definitions:
       schemaVersion:
         type: integer
     type: object
+  v1.HeartbeatsResult:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Heartbeat'
+        type: array
+      end:
+        type: string
+      start:
+        type: string
+      timezone:
+        type: string
+    type: object
   v1.Project:
     properties:
       id:
@@ -470,7 +483,13 @@ paths:
         type: string
       responses:
         "200":
-          description: ""
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.HeartbeatsResult'
+        "400":
+          description: bad date
+          schema:
+            type: string
       security:
       - ApiKeyAuth: []
       summary: Get heartbeats of user for specified date

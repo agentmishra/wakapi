@@ -46,7 +46,8 @@ func (h *HeartbeatHandler) RegisterRoutes(router *mux.Router) {
 // @Param date query string true "Date"
 // @Param user path string true "Username (or current)"
 // @Security ApiKeyAuth
-// @Success 200
+// @Success 200 {object} v1.HeartbeatsResult
+// @Failure 400 {string} string "bad date"
 // @Router /compat/wakatime/v1/users/{user}/heartbeats [get]
 func (h *HeartbeatHandler) Get(w http.ResponseWriter, r *http.Request) {
 	user, err := routeutils.CheckEffectiveUser(w, r, h.userSrvc, "current")
