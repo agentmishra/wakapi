@@ -1,9 +1,10 @@
 package mocks
 
 import (
+	"time"
+
 	"github.com/muety/wakapi/models"
 	"github.com/stretchr/testify/mock"
-	"time"
 )
 
 type HeartbeatServiceMock struct {
@@ -36,6 +37,11 @@ func (m *HeartbeatServiceMock) CountByUsers(users []*models.User) ([]*models.Cou
 }
 
 func (m *HeartbeatServiceMock) GetAllWithin(time time.Time, time2 time.Time, user *models.User) ([]*models.Heartbeat, error) {
+	args := m.Called(time, time2, user)
+	return args.Get(0).([]*models.Heartbeat), args.Error(1)
+}
+
+func (m *HeartbeatServiceMock) GetAllWithinUTC(time time.Time, time2 time.Time, user *models.User) ([]*models.Heartbeat, error) {
 	args := m.Called(time, time2, user)
 	return args.Get(0).([]*models.Heartbeat), args.Error(1)
 }

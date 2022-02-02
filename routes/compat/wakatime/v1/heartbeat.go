@@ -7,10 +7,18 @@ import (
 	"github.com/gorilla/mux"
 	conf "github.com/muety/wakapi/config"
 	"github.com/muety/wakapi/middlewares"
+	"github.com/muety/wakapi/models"
 	routeutils "github.com/muety/wakapi/routes/utils"
 	"github.com/muety/wakapi/services"
 	"github.com/muety/wakapi/utils"
 )
+
+type HeartbeatsResult struct {
+	Data     []*models.Heartbeat `json:"data"`
+	End      string              `json:"end"`
+	Start    string              `json:"start"`
+	Timezone string              `json:"timezone"`
+}
 
 type HeartbeatHandler struct {
 	userSrvc      services.IUserService
@@ -54,15 +62,23 @@ func (h *HeartbeatHandler) Get(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("bad date"))
 		return
 	}
-	timezone := user.TZ()
-	rangeFrom, rangeTo := utils.StartOfDay(date).In(timezone), utils.EndOfDay(date).In(timezone)
 
-	heartbeats, err := h.heartbeatSrvc.GetAllWithin(rangeFrom, rangeTo, user)
+	timezone := user.TZ()
+	rangeFrom, rangeTo := utils.StartOfDay(date.In(timezone)), utils.EndOfDay(date.In(timezone))
+
+	heartbeats, err := h.heartbeatSrvc.GetAllWithinUTC(rangeFrom, rangeTo, user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(conf.ErrInternalServerError))
 		conf.Log().Request(r).Error("failed to retrieve heartbeats - %v", err)
 		return
 	}
-	utils.RespondJSON(w, r, http.StatusOK, heartbeats)
+
+	res := HeartbeatsResult{
+		Data:     heartbeats,
+		Start:    rangeFrom.UTC().String(),
+		End:      rangeTo.UTC().String(),
+		Timezone: timezone.String(),
+	}
+	utils.RespondJSON(w, r, http.StatusOK, res)
 }

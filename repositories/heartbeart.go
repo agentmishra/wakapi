@@ -2,10 +2,11 @@ package repositories
 
 import (
 	"errors"
+	"time"
+
 	"github.com/muety/wakapi/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"time"
 )
 
 type HeartbeatRepository struct {
@@ -70,6 +71,19 @@ func (r *HeartbeatRepository) GetAllWithin(from, to time.Time, user *models.User
 		Where(&models.Heartbeat{UserID: user.ID}).
 		Where("time >= ?", from.Local()).
 		Where("time < ?", to.Local()).
+		Order("time asc").
+		Find(&heartbeats).Error; err != nil {
+		return nil, err
+	}
+	return heartbeats, nil
+}
+
+func (r *HeartbeatRepository) GetAllWithinUTC(from, to time.Time, user *models.User) ([]*models.Heartbeat, error) {
+	var heartbeats []*models.Heartbeat
+	if err := r.db.
+		Where(&models.Heartbeat{UserID: user.ID}).
+		Where("time >= ?", from.UTC()).
+		Where("time < ?", to.UTC()).
 		Order("time asc").
 		Find(&heartbeats).Error; err != nil {
 		return nil, err

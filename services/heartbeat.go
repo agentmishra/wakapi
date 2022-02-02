@@ -2,14 +2,15 @@ package services
 
 import (
 	"fmt"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/leandro-lugaresi/hub"
 	"github.com/muety/wakapi/config"
 	"github.com/muety/wakapi/repositories"
 	"github.com/muety/wakapi/utils"
 	"github.com/patrickmn/go-cache"
-	"strings"
-	"sync"
-	"time"
 
 	"github.com/muety/wakapi/models"
 )
@@ -128,6 +129,14 @@ func (srv *HeartbeatService) CountByUsers(users []*models.User) ([]*models.Count
 
 func (srv *HeartbeatService) GetAllWithin(from, to time.Time, user *models.User) ([]*models.Heartbeat, error) {
 	heartbeats, err := srv.repository.GetAllWithin(from, to, user)
+	if err != nil {
+		return nil, err
+	}
+	return srv.augmented(heartbeats, user.ID)
+}
+
+func (srv *HeartbeatService) GetAllWithinUTC(from, to time.Time, user *models.User) ([]*models.Heartbeat, error) {
+	heartbeats, err := srv.repository.GetAllWithinUTC(from, to, user)
 	if err != nil {
 		return nil, err
 	}

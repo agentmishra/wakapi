@@ -979,7 +979,14 @@
 									"",
 									"pm.test(\"Response body is correct\", function () {",
 									"    var jsonData = pm.response.json();",
-									"    pm.expect(jsonData.length).to.eql(3);",
+									"    pm.expect(jsonData.timezone).to.eql(pm.collectionVariables.get('TZ'));",
+									"    var now = new Date();",
+									"    now.setMinutes(0); now.setUTCHours(0); now.setSeconds(0); now.setUTCMilliseconds(0);",
+									"    var offset = new Date(now.toLocaleString('en-US', { timeZone: \"UTC\" })) - new Date(now.toLocaleString('en-US', { timeZone: pm.collectionVariables.get('TZ') }));",
+									"    var date = new Date(now.getTime() + offset);",
+									"    pm.expect(new Date(jsonData.start)).to.eql(date);",
+									"    pm.expect(new Date(jsonData.end)).to.eql(new Date(date.getTime() + 3600 * 1000 * 24));",
+									"    pm.expect(jsonData.data.length).to.eql(3);",
 									"});"
 								],
 								"type": "text/javascript"
