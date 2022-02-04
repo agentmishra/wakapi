@@ -77,8 +77,8 @@ func (h *HeartbeatHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	res := HeartbeatsResult{
 		Data:     heartbeats,
-		Start:    rangeFrom.UTC().String(),
-		End:      rangeTo.UTC().String(),
+		Start:    rangeFrom.UTC().Format(time.RFC3339),
+		End:      rangeTo.UTC().Format(time.RFC3339),
 		Timezone: timezone.String(),
 	}
 	utils.RespondJSON(w, r, http.StatusOK, res)
