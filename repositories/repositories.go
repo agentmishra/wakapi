@@ -21,7 +21,7 @@ type IHeartbeatRepository interface {
 	InsertBatch([]*models.Heartbeat) error
 	GetAll() ([]*models.Heartbeat, error)
 	GetAllWithin(time.Time, time.Time, *models.User) ([]*models.Heartbeat, error)
-	GetAllWithinUTC(time.Time, time.Time, *models.User) ([]*models.Heartbeat, error)
+	GetAllWithinUnix(time.Time, time.Time, *models.User) ([]*models.Heartbeat, error)
 	GetFirstByUsers() ([]*models.TimeByUser, error)
 	GetLastByUsers() ([]*models.TimeByUser, error)
 	GetLatestByUser(*models.User) (*models.Heartbeat, error)

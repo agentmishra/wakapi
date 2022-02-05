@@ -67,7 +67,7 @@ func (h *HeartbeatHandler) Get(w http.ResponseWriter, r *http.Request) {
 	timezone := user.TZ()
 	rangeFrom, rangeTo := utils.StartOfDay(date.In(timezone)), utils.EndOfDay(date.In(timezone))
 
-	heartbeats, err := h.heartbeatSrvc.GetAllWithinUTC(rangeFrom, rangeTo, user)
+	heartbeats, err := h.heartbeatSrvc.GetAllWithinUnix(rangeFrom, rangeTo, user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(conf.ErrInternalServerError))

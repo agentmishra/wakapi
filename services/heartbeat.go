@@ -135,8 +135,8 @@ func (srv *HeartbeatService) GetAllWithin(from, to time.Time, user *models.User)
 	return srv.augmented(heartbeats, user.ID)
 }
 
-func (srv *HeartbeatService) GetAllWithinUTC(from, to time.Time, user *models.User) ([]*models.Heartbeat, error) {
-	heartbeats, err := srv.repository.GetAllWithinUTC(from, to, user)
+func (srv *HeartbeatService) GetAllWithinUnix(from, to time.Time, user *models.User) ([]*models.Heartbeat, error) {
+	heartbeats, err := srv.repository.GetAllWithinUnix(from, to, user)
 	if err != nil {
 		return nil, err
 	}

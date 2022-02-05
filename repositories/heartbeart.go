@@ -78,12 +78,12 @@ func (r *HeartbeatRepository) GetAllWithin(from, to time.Time, user *models.User
 	return heartbeats, nil
 }
 
-func (r *HeartbeatRepository) GetAllWithinUTC(from, to time.Time, user *models.User) ([]*models.Heartbeat, error) {
+func (r *HeartbeatRepository) GetAllWithinUnix(from, to time.Time, user *models.User) ([]*models.Heartbeat, error) {
 	var heartbeats []*models.Heartbeat
 	if err := r.db.
 		Where(&models.Heartbeat{UserID: user.ID}).
-		Where("time >= ?", from.UTC()).
-		Where("time < ?", to.UTC()).
+		Where("time >= datetime(?, 'unixepoch')", from.Unix()).
+		Where("time < datetime(?, 'unixepoch')", to.Unix()).
 		Order("time asc").
 		Find(&heartbeats).Error; err != nil {
 		return nil, err

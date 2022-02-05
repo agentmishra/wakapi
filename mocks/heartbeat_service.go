@@ -41,7 +41,7 @@ func (m *HeartbeatServiceMock) GetAllWithin(time time.Time, time2 time.Time, use
 	return args.Get(0).([]*models.Heartbeat), args.Error(1)
 }
 
-func (m *HeartbeatServiceMock) GetAllWithinUTC(time time.Time, time2 time.Time, user *models.User) ([]*models.Heartbeat, error) {
+func (m *HeartbeatServiceMock) GetAllWithinUnix(time time.Time, time2 time.Time, user *models.User) ([]*models.Heartbeat, error) {
 	args := m.Called(time, time2, user)
 	return args.Get(0).([]*models.Heartbeat), args.Error(1)
 }
